@@ -107,27 +107,46 @@ public class XMLConfigBuilder extends BaseBuilder {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+    // 在mybatis-config.xml配置文件中查找<configuration>节点，并开始解析
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
 
+  /**
+   * 解析配置文件，默认配置文件为mybatis-config.xml
+   * @param root
+   */
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
+      // 解析<properties>节点
       propertiesElement(root.evalNode("properties"));
+      // 解析<settings>节点
       Properties settings = settingsAsProperties(root.evalNode("settings"));
+      // 加载自定义VFS实现
       loadCustomVfsImpl(settings);
+      // 加载自定义日志实现
       loadCustomLogImpl(settings);
+      // 解析<typeAliases>节点
       typeAliasesElement(root.evalNode("typeAliases"));
+      // 解析<plugins>节点
       pluginsElement(root.evalNode("plugins"));
+      // 解析<objectFactory>节点
       objectFactoryElement(root.evalNode("objectFactory"));
+      // 解析<objectWrapperFactory>节点
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      // 解析<reflectorFactory>节点
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
+      // 将settings值设置到全局配置项Configuration中
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      // 解析<environments>节点
       environmentsElement(root.evalNode("environments"));
+      // 解析<databaseIdProvider>节点
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      // 解析<typeHandlers>节点
       typeHandlersElement(root.evalNode("typeHandlers"));
+      // 解析<mappers>节点，这一步会加载所有mybatis-config.xml文件中指定的mapper映射文件
       mappersElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -386,18 +405,28 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 解析mybatis-config.xml文件中指定的所有mapper映射文件
+   */
   private void mappersElement(XNode context) throws Exception {
     if (context == null) {
       return;
     }
+    // 处理mybatis-config.xml中<mappers>的子节点
     for (XNode child : context.getChildren()) {
+      // 处理<package>节点
       if ("package".equals(child.getName())) {
+        // 获取包名
         String mapperPackage = child.getStringAttribute("name");
+        // 扫描指定的包，并向MapperRegistry注册Mapper接口
         configuration.addMappers(mapperPackage);
       } else {
+        // 获取<mapper>节点的resource、url、class属性，这三个属性互斥
         String resource = child.getStringAttribute("resource");
         String url = child.getStringAttribute("url");
         String mapperClass = child.getStringAttribute("class");
+        // 分情况处理resource、url、class属性的一者，目的都是注册mapper接口
+        // 处理resource属性
         if (resource != null && url == null && mapperClass == null) {
           ErrorContext.instance().resource(resource);
           try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
@@ -405,6 +434,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                 configuration.getSqlFragments());
             mapperParser.parse();
           }
+          // 处理url属性
         } else if (resource == null && url != null && mapperClass == null) {
           ErrorContext.instance().resource(url);
           try (InputStream inputStream = Resources.getUrlAsStream(url)) {
@@ -412,10 +442,12 @@ public class XMLConfigBuilder extends BaseBuilder {
                 configuration.getSqlFragments());
             mapperParser.parse();
           }
+          // 处理mapperClass属性
         } else if (resource == null && url == null && mapperClass != null) {
           Class<?> mapperInterface = Resources.classForName(mapperClass);
           configuration.addMapper(mapperInterface);
         } else {
+          // 不满足互斥条件（同时配置resource、url、class属性中的两者及以上），抛异常
           throw new BuilderException(
               "A mapper element may only specify a url, resource or class, but not more than one.");
         }

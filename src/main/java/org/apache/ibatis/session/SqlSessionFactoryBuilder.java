@@ -30,6 +30,7 @@ import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
  *
  * @author Clinton Begin
  */
+// SqlSessionFactory建造者，用于构建SqlSessionFactory实例，使用了建造者模式
 public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(Reader reader) {
@@ -46,7 +47,9 @@ public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
     try {
+      // 创建XMLConfigBuilder来解析配置文件
       XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
+      // 返回SqlSessionFactory封装结果，解析动作在parser.parse()完成
       return build(parser.parse());
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);

@@ -97,6 +97,7 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * mybatis全局配置项
  * @author Clinton Begin
  */
 public class Configuration {
@@ -888,6 +889,7 @@ public class Configuration {
   }
 
   public void addMappers(String packageName) {
+    // 向mapperRegistry注册Mapper接口
     mapperRegistry.addMappers(packageName);
   }
 

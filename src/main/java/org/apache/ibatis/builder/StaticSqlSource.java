@@ -23,6 +23,7 @@ import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 与DynamicSqlSource的区别为StaticSqlSource中记录的SQL语句中可能包含?占位符，但是可以直接提交给数据库执行
  * @author Clinton Begin
  */
 public class StaticSqlSource implements SqlSource {

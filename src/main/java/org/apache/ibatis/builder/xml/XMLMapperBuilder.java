@@ -50,6 +50,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
+ * 该类负责解析mapper映射配置文件，但是不负责解析SQL节点，SQL节点的解析交由XMLStatementBuilder解析
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -57,6 +58,10 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private final XPathParser parser;
   private final MapperBuilderAssistant builderAssistant;
+
+  /**
+   * 存放SQL语句片段
+   */
   private final Map<String, XNode> sqlFragments;
   private final String resource;
 
@@ -95,14 +100,24 @@ public class XMLMapperBuilder extends BaseBuilder {
     this.resource = resource;
   }
 
+  /**
+   * 解析Mapper映射文件入口，该类中除构造方法之外唯二的public方法
+   */
   public void parse() {
+    // 判断是否已经加载过该映射文件，如果没有加载，就进行加载
     if (!configuration.isResourceLoaded(resource)) {
+      // 解析<mapper>节点
       configurationElement(parser.evalNode("/mapper"));
+      // 记录加载过的映射文件
       configuration.addLoadedResource(resource);
+      // 注册Mapper接口
       bindMapperForNamespace();
     }
+    // 处理configurationElement方法中解析失败的<resultMap>节点
     parsePendingResultMaps();
+    // 处理configurationElement方法中解析失败的<cache-ref>节点
     parsePendingCacheRefs();
+    // 处理configurationElement方法中解析失败的SQL语句节点
     parsePendingStatements();
   }
 
@@ -110,20 +125,31 @@ public class XMLMapperBuilder extends BaseBuilder {
     return sqlFragments.get(refid);
   }
 
+  /**
+   * 解析<mapper>子节点
+   */
   private void configurationElement(XNode context) {
     try {
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
+      // 设置MapperBuilderAssistant的currentNamespace字段，记录当前命名空间
       builderAssistant.setCurrentNamespace(namespace);
+      // 解析<cache-ref>节点
       cacheRefElement(context.evalNode("cache-ref"));
+      // 解析<cache>节点
       cacheElement(context.evalNode("cache"));
+      // 解析<parameterMap>节点（该节点已废弃，不推荐使用）
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+      // 解析<resultMap>节点
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+      // 解析<sql>节点
       sqlElement(context.evalNodes("/mapper/sql"));
+      // 解析<select>、<insert>、<update>、<delete>节点
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
+      // 处理解析过程中出现的异常，抛出
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
     }
   }

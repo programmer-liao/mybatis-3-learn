@@ -35,6 +35,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 负责mapper映射文件中SQL节点的解析
  * @author Clinton Begin
  */
 public class XMLStatementBuilder extends BaseBuilder {
