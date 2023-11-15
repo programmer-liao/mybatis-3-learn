@@ -31,6 +31,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * Mapper接口的代理对象
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

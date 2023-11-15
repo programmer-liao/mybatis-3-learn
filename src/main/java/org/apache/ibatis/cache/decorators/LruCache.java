@@ -25,14 +25,27 @@ import org.apache.ibatis.cache.Cache;
  *
  * @author Clinton Begin
  */
+// lru：最近最少使用缓存
 public class LruCache implements Cache {
 
+  /**
+   * 被装饰的底层Cache对象，一般传入的就是PerpetualCache
+   */
   private final Cache delegate;
+
+  /**
+   * 类型对象，它是一个有序的HashMap，用于记录key最近的使用情况
+   */
   private Map<Object, Object> keyMap;
+
+  /**
+   * 记录最少被使用的缓存项的key，也就是将要被淘汰的key
+   */
   private Object eldestKey;
 
   public LruCache(Cache delegate) {
     this.delegate = delegate;
+    // 设置默认缓存大小：1024，可以通过setSize更改
     setSize(1024);
   }
 
@@ -47,12 +60,16 @@ public class LruCache implements Cache {
   }
 
   public void setSize(final int size) {
+    // 重新设置缓存大小时，会重置keyMap字段
+    // accessOrder=true表示LinkedHashMap记录的顺序是按访问的顺序，天然的lru
     keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
       private static final long serialVersionUID = 4267176411845948333L;
 
+      // 调用put方法时，会调用该方法
       @Override
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
+        // 如果已到达缓存上限，则更新eldestKey，后面会删除eldestKey对应的缓存
         if (tooBig) {
           eldestKey = eldest.getKey();
         }
@@ -63,7 +80,9 @@ public class LruCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
+    // 添加缓存
     delegate.putObject(key, value);
+    // 检测并清理缓存
     cycleKeyList(key);
   }
 
@@ -87,7 +106,9 @@ public class LruCache implements Cache {
 
   private void cycleKeyList(Object key) {
     keyMap.put(key, key);
+    // eldestKey != null，表示已经达到缓存上限
     if (eldestKey != null) {
+      // 删除最久未使用的缓存项
       delegate.removeObject(eldestKey);
       eldestKey = null;
     }

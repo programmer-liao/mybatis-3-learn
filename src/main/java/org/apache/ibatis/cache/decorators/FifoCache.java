@@ -25,15 +25,28 @@ import org.apache.ibatis.cache.Cache;
  *
  * @author Clinton Begin
  */
+// fifo：先进先出
 public class FifoCache implements Cache {
 
+  /**
+   * 被装饰的底层Cache对象，一般传入的就是PerpetualCache
+   */
   private final Cache delegate;
+
+  /**
+   * 用于记录key进入缓存的先后顺序
+   */
   private final Deque<Object> keyList;
+
+  /**
+   * 记录了缓存项的上限，超过该值，则需要清理最老的 缓存项
+   */
   private int size;
 
   public FifoCache(Cache delegate) {
     this.delegate = delegate;
     this.keyList = new LinkedList<>();
+    // 缓存默认值：1024
     this.size = 1024;
   }
 

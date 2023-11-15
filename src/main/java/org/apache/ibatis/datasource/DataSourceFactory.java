@@ -20,12 +20,20 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 /**
+ * DataSourceFactory 数据源工厂（使用工厂方法模式）
+ * 实现：PooledDataSource 和 unpooledDataSource
  * @author Clinton Begin
  */
 public interface DataSourceFactory {
 
+  /**
+   * 设置数据源的相关属性，一般紧跟在初始化完成之后
+   */
   void setProperties(Properties props);
 
+  /**
+   * 创建数据源的方法接口
+   */
   DataSource getDataSource();
 
 }

@@ -33,6 +33,7 @@ import javax.sql.DataSource;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 非池化数据源实现
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

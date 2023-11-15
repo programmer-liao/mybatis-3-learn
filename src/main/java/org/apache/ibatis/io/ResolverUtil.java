@@ -55,6 +55,7 @@ import org.apache.ibatis.logging.LogFactory;
  * @param <T>
  *          the generic type
  */
+// 此工具可以根据指定的条件查找指定包下的类
 public class ResolverUtil<T> {
 
   /**

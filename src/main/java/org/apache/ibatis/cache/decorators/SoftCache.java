@@ -29,14 +29,33 @@ import org.apache.ibatis.cache.Cache;
  *
  * @author Clinton Begin
  */
+// 软引用缓存
+// 四种引用强度：强引用>软引用>弱引用>虚引用
 public class SoftCache implements Cache {
+
+  /**
+   * 避免GC回收的强连接队列
+   */
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
+
+  /**
+   * 引用队列，用于记录已经被GC回收的缓存项所对应的SoftEntry对象
+   */
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
+
+  /**
+   * 被装饰的底层Cache对象，一般传入的就是PerpetualCache
+   */
   private final Cache delegate;
+
+  /**
+   * 强连接的个数，默认值：256
+   */
   private int numberOfHardLinks;
 
   public SoftCache(Cache delegate) {
     this.delegate = delegate;
+    // 强连接的个数，默认值：256
     this.numberOfHardLinks = 256;
     this.hardLinksToAvoidGarbageCollection = new LinkedList<>();
     this.queueOfGarbageCollectedEntries = new ReferenceQueue<>();
@@ -66,9 +85,10 @@ public class SoftCache implements Cache {
   @Override
   public Object getObject(Object key) {
     Object result = null;
-    @SuppressWarnings("unchecked") // assumed delegate cache is totally managed by this cache
+    @SuppressWarnings("unchecked") // assumed（假设） delegate cache is totally managed by this cache
     SoftReference<Object> softReference = (SoftReference<Object>) delegate.getObject(key);
     if (softReference != null) {
+      // 获取SoftReference引用的value
       result = softReference.get();
       if (result == null) {
         delegate.removeObject(key);

@@ -18,6 +18,7 @@ package org.apache.ibatis.binding;
 import org.apache.ibatis.exceptions.PersistenceException;
 
 /**
+ * 在Binding期间发生的异常
  * @author Clinton Begin
  */
 public class BindingException extends PersistenceException {

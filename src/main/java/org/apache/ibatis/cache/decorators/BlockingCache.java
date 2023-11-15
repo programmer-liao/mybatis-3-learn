@@ -34,10 +34,24 @@ import org.apache.ibatis.cache.CacheException;
  *
  * @author Eduardo Macarron
  */
+// 阻塞版本的缓存装饰器，它会保证只有一个线程到数据库中查找指定key对应的数据
+// 使用不当可能会导致死锁
 public class BlockingCache implements Cache {
 
+  /**
+   * 获取锁阻塞超时时间
+   */
   private long timeout;
+
+  /**
+   * 被装饰的底层Cache对象，一般传入的就是PerpetualCache
+   */
   private final Cache delegate;
+
+  /**
+   * 对于每一个key，都有一个锁
+   * 访问key对应的缓存，需要先获取锁
+   */
   private final ConcurrentHashMap<Object, CountDownLatch> locks;
 
   public BlockingCache(Cache delegate) {
@@ -86,8 +100,13 @@ public class BlockingCache implements Cache {
     delegate.clear();
   }
 
+  /**
+   * 获取key对应的锁
+   */
   private void acquireLock(Object key) {
+    // count设置为1，一次只能有一个线程获取锁
     CountDownLatch newLatch = new CountDownLatch(1);
+    // 如果线程A未查找到keyA对应的缓存，线程A会获取keyA对应的锁，这样后续线程在查找keyA时会发生阻塞
     while (true) {
       CountDownLatch latch = locks.putIfAbsent(key, newLatch);
       if (latch == null) {
@@ -95,12 +114,14 @@ public class BlockingCache implements Cache {
       }
       try {
         if (timeout > 0) {
+          // 超时获取
           boolean acquired = latch.await(timeout, TimeUnit.MILLISECONDS);
           if (!acquired) {
             throw new CacheException(
                 "Couldn't get a lock in " + timeout + " for the key " + key + " at the cache " + delegate.getId());
           }
         } else {
+          // 一直阻塞，直到获取到为止
           latch.await();
         }
       } catch (InterruptedException e) {
@@ -109,6 +130,9 @@ public class BlockingCache implements Cache {
     }
   }
 
+  /**
+   * 释放key对应的锁
+   */
   private void releaseLock(Object key) {
     CountDownLatch latch = locks.remove(key);
     if (latch == null) {

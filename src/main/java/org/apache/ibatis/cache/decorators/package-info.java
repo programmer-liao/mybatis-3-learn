@@ -14,6 +14,7 @@
  *    limitations under the License.
  */
 /**
+ * 正如包名，这个模块使用到了装饰器模式，扮演着ConcreteDecorator的角色，提供了多种缓存（装饰器）实现
  * Contains cache decorators.
  */
 package org.apache.ibatis.cache.decorators;

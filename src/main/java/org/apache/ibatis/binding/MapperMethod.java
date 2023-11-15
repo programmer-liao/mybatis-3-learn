@@ -39,6 +39,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * 封装了Mapper接口中对应方法的信息
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss

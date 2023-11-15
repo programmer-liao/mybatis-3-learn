@@ -31,6 +31,7 @@ public final class LogFactory {
   private static Constructor<? extends Log> logConstructor;
 
   static {
+    // 按顺序尝试加载Log实现，直到成功加载（logConstructor != null）
     tryImplementation(LogFactory::useSlf4jLogging);
     tryImplementation(LogFactory::useCommonsLogging);
     tryImplementation(LogFactory::useLog4J2Logging);
@@ -71,6 +72,7 @@ public final class LogFactory {
    * @deprecated Since 3.5.9 - See https://github.com/mybatis/mybatis-3/issues/1223. This method will remove future.
    */
   @Deprecated
+  // 请使用Log4J2
   public static synchronized void useLog4JLogging() {
     setImplementation(org.apache.ibatis.logging.log4j.Log4jImpl.class);
   }

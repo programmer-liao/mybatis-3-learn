@@ -41,17 +41,40 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
+ * XPathParser XML文件解析器（用于解析config、mapper文件）
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class XPathParser {
 
+
+  /**
+   * 加载的XML文档会保存在这个对象中
+   */
   private final Document document;
+
+  /**
+   * 是否开启验证
+   */
   private boolean validation;
+
+  /**
+   * 用于加载本地DTD文件
+   */
   private EntityResolver entityResolver;
+
+  /**
+   * mybatis-config.xml中<properties>标签定义的键值对集合
+   */
   private Properties variables;
+
+  /**
+   * XPath对象，提供了解析XPath表达式等功能
+   */
   private XPath xpath;
 
+
+  // 以下构造函数用于从不同的介质中初始化XPathParser
   public XPathParser(String xml) {
     commonConstructor(false, null, null);
     this.document = createDocument(new InputSource(new StringReader(xml)));
@@ -136,6 +159,7 @@ public class XPathParser {
     this.variables = variables;
   }
 
+  // eval*()方法用于解析对应类型（boolean、short、long、int、String、Node等）的信息
   public String evalString(String expression) {
     return evalString(document, expression);
   }
@@ -218,6 +242,9 @@ public class XPathParser {
     return new XNode(this, node, variables);
   }
 
+  /**
+   * eval*()方法都会直接或间接调用evaluate方法
+   */
   private Object evaluate(String expression, Object root, QName returnType) {
     try {
       return xpath.evaluate(expression, root, returnType);
@@ -226,6 +253,9 @@ public class XPathParser {
     }
   }
 
+  /**
+   * 创建Document对象并加载XML文档到Document对象中
+   */
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
@@ -263,6 +293,9 @@ public class XPathParser {
     }
   }
 
+  /**
+   * 通用构造器，完成通用构造过程的封装
+   */
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
     this.entityResolver = entityResolver;

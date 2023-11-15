@@ -22,6 +22,11 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
 /**
+ * 在Cache接口实现类中，只有PerpetualCache不在decorators包下
+ * 扮演着装饰器模式下ConcreteComponent的角色
+ * PerpetualCache基于HashMap实现最基本的缓存
+ * decorators包下的缓存实现都是对PerpetualCache的增强
+ * Perpetual：永久的
  * @author Clinton Begin
  */
 public class PerpetualCache implements Cache {
@@ -30,6 +35,7 @@ public class PerpetualCache implements Cache {
 
   private final Map<Object, Object> cache = new HashMap<>();
 
+  // 这个构造函数是Cache接口要求的
   public PerpetualCache(String id) {
     this.id = id;
   }
@@ -64,6 +70,7 @@ public class PerpetualCache implements Cache {
     cache.clear();
   }
 
+  // 重写equals的同时要重写hashCode，两者都只关心id字段，并不关心cache字段
   @Override
   public boolean equals(Object o) {
     if (getId() == null) {

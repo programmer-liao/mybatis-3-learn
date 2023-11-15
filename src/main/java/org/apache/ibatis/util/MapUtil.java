@@ -43,6 +43,7 @@ public class MapUtil {
     return new AbstractMap.SimpleImmutableEntry<>(key, value);
   }
 
+  // 工具类构造器私有化，强化不可实例化的能力 《Effective Java》有提到过
   private MapUtil() {
   }
 }
