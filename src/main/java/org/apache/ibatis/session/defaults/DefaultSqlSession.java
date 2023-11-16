@@ -44,6 +44,8 @@ import org.apache.ibatis.session.SqlSession;
  *
  * @author Clinton Begin
  */
+// DefaultSqlSession使用了策略模式，扮演了Context的角色
+// 并将所有数据库相关的操作全部封装到Executor接口实现中，并通过executor字段选择不同的Executor实现
 public class DefaultSqlSession implements SqlSession {
 
   private final Configuration configuration;

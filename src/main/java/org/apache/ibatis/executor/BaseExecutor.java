@@ -45,20 +45,45 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 一个实现了Executor接口的抽象类，实现了Executor接口的大部分方法，使用了抽象模版模式
+ * 主要提供了缓存管理和失去管理的基本功能
+ * 继承BaseExecutor的子类只需要实现doUpdate、doQuery、doQueryCursor、doFlushStatement方法即可
+ * 其余功能在BaseExecutor中实现
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {
 
   private static final Log log = LogFactory.getLog(BaseExecutor.class);
 
+  /**
+   * 该对象实现事务的提交、回滚和关闭操作
+   */
   protected Transaction transaction;
+
+  /**
+   * 封装的Executor对象
+   */
   protected Executor wrapper;
 
+  /**
+   * 延迟加载队列
+   */
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+
+  /**
+   * 一级缓存，用于缓存Executor对象查询结果集映射得到的结果对象
+   */
   protected PerpetualCache localCache;
+
+  /**
+   * 一级缓存，用于缓存输出类型的参数
+   */
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
 
+  /**
+   * 用来记录嵌套查询的层数
+   */
   protected int queryStack;
   private boolean closed;
 
@@ -122,6 +147,11 @@ public abstract class BaseExecutor implements Executor {
     return flushStatements(false);
   }
 
+  /**
+   * 在BatchExecutor实现中，可以缓存多条SQL语句，等待合适的时机将缓存的多条SQL语句一并发送到数据库执行
+   * flushStatements用于处理Executor中缓存的多条SQL语句
+   * BaseExecutor.commit()和BaseExecutor.rollback()方法都会首先调用flushStatements()方法，再去执行相关事务操作
+   */
   public List<BatchResult> flushStatements(boolean isRollBack) throws SQLException {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
@@ -196,6 +226,7 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
+    // 检查当前Executor是否已经关闭
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
@@ -204,10 +235,12 @@ public abstract class BaseExecutor implements Executor {
     cacheKey.update(rowBounds.getOffset());
     cacheKey.update(rowBounds.getLimit());
     cacheKey.update(boundSql.getSql());
+    // 获取用户传入的实参
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
     // mimic DefaultParameterHandler logic
     MetaObject metaObject = null;
+    // 将用户传入的实参添加到CacheKey对象中
     for (ParameterMapping parameterMapping : parameterMappings) {
       if (parameterMapping.getMode() != ParameterMode.OUT) {
         Object value;
@@ -244,6 +277,7 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Cannot commit, transaction is already closed");
     }
+    // 清空一级缓存
     clearLocalCache();
     flushStatements();
     if (required) {

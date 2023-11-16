@@ -87,6 +87,9 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     return configuration;
   }
 
+  /**
+   * 通过数据源获取数据库连接，并创建Executor对象以及DefaultSqlSession对象
+   */
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level,
       boolean autoCommit) {
     Transaction tx = null;
@@ -104,6 +107,9 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     }
   }
 
+  /**
+   * 通过数据库连接对象Connection创建Executor对象以及DefaultSqlSession对象
+   */
   private SqlSession openSessionFromConnection(ExecutorType execType, Connection connection) {
     try {
       boolean autoCommit;

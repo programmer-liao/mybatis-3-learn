@@ -32,6 +32,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 最简单的Executor接口实现
  * @author Clinton Begin
  */
 public class SimpleExecutor extends BaseExecutor {
@@ -49,6 +50,7 @@ public class SimpleExecutor extends BaseExecutor {
       stmt = prepareStatement(handler, ms.getStatementLog());
       return handler.update(stmt);
     } finally {
+      // 关闭Statement对象
       closeStatement(stmt);
     }
   }
@@ -58,12 +60,16 @@ public class SimpleExecutor extends BaseExecutor {
       BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
+      // 获取配置对象
       Configuration configuration = ms.getConfiguration();
+      // 创建StatementHandler对象，实际返回的是RoutingStatementHandler
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
           boundSql);
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // 调用StatementHandler.query()方法，执行SQL语句，并通过ResultSetHandler完成结果集的映射
       return handler.query(stmt, resultHandler);
     } finally {
+      // 关闭Statement对象
       closeStatement(stmt);
     }
   }
@@ -71,6 +77,7 @@ public class SimpleExecutor extends BaseExecutor {
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
+    // 获取配置对象
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());

@@ -33,6 +33,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * CachingExecutor用到了装饰器模式，为Executor对象增加了二级缓存的相关功能
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

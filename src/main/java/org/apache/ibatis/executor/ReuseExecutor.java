@@ -34,10 +34,14 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * ReuseExecutor提供了Statement重用的功能
  * @author Clinton Begin
  */
 public class ReuseExecutor extends BaseExecutor {
 
+  /**
+   * 缓存使用过的Statement对象
+   */
   private final Map<String, Statement> statementMap = new HashMap<>();
 
   public ReuseExecutor(Configuration configuration, Transaction transaction) {
