@@ -27,14 +27,22 @@ public class ExceptionUtil {
     // Prevent Instantiation
   }
 
+  /**
+   * 用于将包装过的异常逐层解包，直到获取原始的未包装异常为止
+   * @param wrapped 待解包的Throwable对象
+   * @return 解包后的Throwable对象
+   */
   public static Throwable unwrapThrowable(Throwable wrapped) {
     Throwable unwrapped = wrapped;
-    while (true) {
+    while (true) { // 直到获取到原始的未包装异常为止
+      // 如果是InvocationTargetException，获取TargetException
       if (unwrapped instanceof InvocationTargetException) {
         unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
+        // 如果是UndeclaredThrowableException，获取undeclaredThrowable异常
       } else if (unwrapped instanceof UndeclaredThrowableException) {
         unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
       } else {
+        // 已经解包完成，返回
         return unwrapped;
       }
     }

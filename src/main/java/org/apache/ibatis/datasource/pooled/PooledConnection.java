@@ -24,21 +24,59 @@ import java.sql.SQLException;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
+ * PooledDataSource管理的连接对象
  * @author Clinton Begin
  */
+// 实现了InvocationHandler接口（JDK动态代理），执行的代理方法是invoke
 class PooledConnection implements InvocationHandler {
 
   private static final String CLOSE = "close";
   private static final Class<?>[] IFACES = { Connection.class };
 
+  /**
+   * 用于标识唯一的PooledConnection对象，重写了equals方法
+   */
   private final int hashCode;
+
+  /**
+   * PooledConnection属于的连接池对象
+   */
   private final PooledDataSource dataSource;
+
+  /**
+   * 真正的数据库连接对象
+   */
   private final Connection realConnection;
+
+  /**
+   * 数据库连接的代理对象
+   */
   private final Connection proxyConnection;
+
+  /**
+   * 从连接池中取出该连接的时间戳
+   */
   private long checkoutTimestamp;
+
+  /**
+   * 该连接创建的时间戳
+   */
   private long createdTimestamp;
+
+  /**
+   * 最后一次被使用的时间戳
+   */
   private long lastUsedTimestamp;
+
+  /**
+   * 由数据库URL、用户名和密码计算出来的hash值，用于标识该连接所在的连接池
+   */
   private int connectionTypeCode;
+
+  /**
+   * 检测当前PooledConnection是否有效
+   * 主要是为了防止程序通过close()方法将连接归还给连接池后，依然通过该连接操作数据库
+   */
   private boolean valid;
 
   /**
@@ -68,10 +106,11 @@ class PooledConnection implements InvocationHandler {
 
   /**
    * Method to see if the connection is usable.
-   *
+   * 判断连接是否有效
    * @return True if the connection is usable
    */
   public boolean isValid() {
+    // 如果开启了poolPingEnabled选项，则会进行ping测试
     return valid && realConnection != null && dataSource.pingConnection(this);
   }
 
@@ -232,6 +271,7 @@ class PooledConnection implements InvocationHandler {
 
   /**
    * Required for InvocationHandler implementation.
+   * 代理执行的方法
    *
    * @param proxy
    *          - not used
@@ -245,6 +285,7 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
+    // 调用close()方法，将其重新放入连接池，而非真正关闭数据库连接
     if (CLOSE.equals(methodName)) {
       dataSource.pushConnection(this);
       return null;
@@ -253,8 +294,10 @@ class PooledConnection implements InvocationHandler {
       if (!Object.class.equals(method.getDeclaringClass())) {
         // issue #579 toString() should never fail
         // throw an SQLException instead of a Runtime
+        // 通过valid字段检测连接是否有效
         checkConnection();
       }
+      // 调用真正数据库连接对象的对应方法
       return method.invoke(realConnection, args);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);

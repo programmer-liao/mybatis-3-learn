@@ -19,21 +19,67 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 用于管理所有连接的状态，表示PooledDataSource的状态
+ *
  * @author Clinton Begin
  */
 public class PoolState {
 
+  /**
+   * PoolState对应的dataSource
+   */
   protected PooledDataSource dataSource;
 
+  /**
+   * 空闲的PooledConnection集合
+   */
   protected final List<PooledConnection> idleConnections = new ArrayList<>();
+
+  /**
+   * 活跃的PooledConnection集合
+   */
   protected final List<PooledConnection> activeConnections = new ArrayList<>();
+
+  /**
+   * 请求数据库连接的次数
+   */
   protected long requestCount;
+
+  /**
+   * 获取连接的累计时间
+   */
   protected long accumulatedRequestTime;
+
+  /**
+   * CheckoutTime表示应用从连接池中取出连接，到归还连接这段时长
+   * accumulatedCheckoutTime记录了所有连接累积的checkoutTime时长
+   */
   protected long accumulatedCheckoutTime;
+
+  /**
+   * 当连接长时间未归还给连接池时，会被认为该连接超时
+   * 记录了超时的连接个数
+   */
   protected long claimedOverdueConnectionCount;
+
+  /**
+   * 累积超时时间
+   */
   protected long accumulatedCheckoutTimeOfOverdueConnections;
+
+  /**
+   * 累积等待时间
+   */
   protected long accumulatedWaitTime;
+
+  /**
+   * 等待次数
+   */
   protected long hadToWaitCount;
+
+  /**
+   * 无效的连接数
+   */
   protected long badConnectionCount;
 
   public PoolState(PooledDataSource dataSource) {
