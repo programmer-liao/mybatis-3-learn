@@ -20,13 +20,16 @@ import java.sql.SQLException;
 
 /**
  * A parameter handler sets the parameters of the {@code PreparedStatement}.
- *
+ * ParameterHandler的主要功能：为SQL语句（PreparedStatement）绑定实参，使用传入的实参替换SQL语句中的"?"占位符
  * @author Clinton Begin
  */
 public interface ParameterHandler {
 
   Object getParameterObject();
 
+  /**
+   * 设置PreparedStatement的实参，替换"?"占位符
+   */
   void setParameters(PreparedStatement ps) throws SQLException;
 
 }

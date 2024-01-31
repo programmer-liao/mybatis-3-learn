@@ -21,6 +21,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 
 /**
+ * 空实现
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

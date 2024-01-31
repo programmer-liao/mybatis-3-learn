@@ -34,6 +34,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 抽象类，只提供了一些参数绑定相关的方法，并没有实现操作数据库的方法
  * @author Clinton Begin
  */
 public abstract class BaseStatementHandler implements StatementHandler {
@@ -42,10 +43,25 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final ObjectFactory objectFactory;
   protected final TypeHandlerRegistry typeHandlerRegistry;
   protected final ResultSetHandler resultSetHandler;
+
+  /**
+   * ParameterHandler的主要功能：为SQL语句绑定实参，使用传入的实参替换SQL语句中的"?"占位符
+   */
   protected final ParameterHandler parameterHandler;
 
+  /**
+   * 记录SQL语句对应的Executor对象
+   */
   protected final Executor executor;
+
+  /**
+   * 记录SQL语句对应的MappedStatement、BoundSql
+   */
   protected final MappedStatement mappedStatement;
+
+  /**
+   * RowBounds记录了用户设置的offset和limit，用于在结果集中定位映射的起始位置和结束位置
+   */
   protected final RowBounds rowBounds;
 
   protected BoundSql boundSql;

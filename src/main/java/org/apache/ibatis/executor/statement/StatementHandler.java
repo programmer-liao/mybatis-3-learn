@@ -26,18 +26,34 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
+ * 语句处理器
  * @author Clinton Begin
  */
 public interface StatementHandler {
 
+  /**
+   * 从连接中获取一个Statement
+   */
   Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException;
 
+  /**
+   * 绑定statement时执行时需要的实参
+   */
   void parameterize(Statement statement) throws SQLException;
 
+  /**
+   * 批量执行SQL
+   */
   void batch(Statement statement) throws SQLException;
 
+  /**
+   * 执行update/insert/delete语句
+   */
   int update(Statement statement) throws SQLException;
 
+  /**
+   * 执行select语句
+   */
   <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException;
 
   <E> Cursor<E> queryCursor(Statement statement) throws SQLException;
