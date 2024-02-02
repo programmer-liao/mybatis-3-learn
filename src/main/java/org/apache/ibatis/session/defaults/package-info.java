@@ -15,5 +15,6 @@
  */
 /**
  * Default impl for SqlSession.
+ * SqlSession的默认实现
  */
 package org.apache.ibatis.session.defaults;

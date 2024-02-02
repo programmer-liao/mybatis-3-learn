@@ -48,7 +48,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   private final SqlSession sqlSessionProxy;
 
   /**
-   * ThreadLocal变量，记录一个与当前线程绑定的SqlSession对象
+   * ThreadLocal变量，记录一个与当前线程绑定的SqlSession对象，避免统一线程多次创建SqlSession对象带来的性能损失
    */
   private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
 

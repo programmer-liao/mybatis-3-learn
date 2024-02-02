@@ -26,8 +26,25 @@ import org.apache.ibatis.executor.BatchResult;
 /**
  * The primary Java interface for working with MyBatis. Through this interface you can execute commands, get mappers and
  * manage transactions.
- *
+ * 使用MyBatis的主要接口，通过这个接口你可以执行命令，获取mappers和管理事务
  * @author Clinton Begin
+ * 以下方法或有多种重载形式，大致意思如下：
+ * 1.selectOne：执行查询语句，返回值为对象
+ * 2.selectList：执行查询语句，返回值为列表
+ * 3.selectMap：执行查询语句，返回值为Map
+ * 4.selectCursor：执行查询语句，返回值为Cursor
+ * 5.select：执行查询语句
+ * 6.insert：执行插入语句
+ * 7.update：执行更新语句
+ * 8.delete：执行删除语句
+ * 9.commit：提交事务
+ * 10.rollback：回滚事务
+ * 11.flushStatements：将请求刷新到数据库里去（批处理时使用）
+ * 12.close：关闭当前session会话
+ * 13.clearCache：清空缓存
+ * 14.getConfiguration：获取Configuration全局对象
+ * 15.getMapper：获取Mapper对象
+ * 16.getConnection：获取sqlSession对应的数据库连接
  */
 public interface SqlSession extends Closeable {
 

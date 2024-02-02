@@ -48,11 +48,30 @@ import org.apache.ibatis.session.SqlSession;
 // 并将所有数据库相关的操作全部封装到Executor接口实现中，并通过executor字段选择不同的Executor实现
 public class DefaultSqlSession implements SqlSession {
 
+  /**
+   * 全局配置对象
+   */
   private final Configuration configuration;
+
+  /**
+   * 底层依赖的Executor对象
+   */
   private final Executor executor;
 
+  /**
+   * 是否自动提交事务
+   */
   private final boolean autoCommit;
+
+  /**
+   * 当前缓存中是否有脏数据
+   */
   private boolean dirty;
+
+  /**
+   * 为防止用户忘记关闭已打开的游标对象，会通过cursorList字段记录由该SqlSession对象生成的游标对象，
+   * 在DefaultSqlSession.close()方法中会统一关闭这些游标对象
+   */
   private List<Cursor<?>> cursorList;
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
@@ -74,10 +93,13 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <T> T selectOne(String statement, Object parameter) {
     // Popular vote was to return null on 0 results and throw exception on too many.
+    // selectOne底层调用的是selectList
+    // 1.查询结果为0时返回null
     List<T> list = this.selectList(statement, parameter);
     if (list.size() == 1) {
       return list.get(0);
     }
+    // 2.selectOne返回的结果只能有一个，多于1个的话就会抛出TooManyResultsException
     if (list.size() > 1) {
       throw new TooManyResultsException(
           "Expected one result (or null) to be returned by selectOne(), but found: " + list.size());
@@ -191,9 +213,11 @@ public class DefaultSqlSession implements SqlSession {
     return update(statement, null);
   }
 
+  // insert、delete、update方法都是调用update方法实现的
   @Override
   public int update(String statement, Object parameter) {
     try {
+      // 表示更新操作有脏数据产生
       dirty = true;
       MappedStatement ms = configuration.getMappedStatement(statement);
       return executor.update(ms, wrapCollection(parameter));
