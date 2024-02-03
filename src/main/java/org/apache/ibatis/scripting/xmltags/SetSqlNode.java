@@ -21,10 +21,15 @@ import java.util.List;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 解析<SET>节点
  * @author Clinton Begin
  */
 public class SetSqlNode extends TrimSqlNode {
 
+  /**
+   * ＜set＞节点解析后的SQL语句片段如果以“,”结尾，
+   * 则将结尾处的“,”删除掉，之后再将“SET”关键字添加到SQL片段的开始位置，从而得到该＜set＞节点最终生成的SQL片段
+   */
   private static final List<String> COMMA = Collections.singletonList(",");
 
   public SetSqlNode(Configuration configuration, SqlNode contents) {

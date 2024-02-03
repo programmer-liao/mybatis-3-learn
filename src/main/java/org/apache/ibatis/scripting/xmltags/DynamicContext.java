@@ -27,6 +27,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * DynamicContext主要用于记录解析动态SQL语句之后产生的SQL语句片段，可以认为它是一个用于记录动态SQL语句解析结果的容器。
  * @author Clinton Begin
  */
 public class DynamicContext {
@@ -38,18 +39,28 @@ public class DynamicContext {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
 
+  /**
+   * 参数上下文
+   */
   private final ContextMap bindings;
+
+  /**
+   * 在SqlNode解析动态SQL时，会将解析后的SQL语句片段添加到该属性中保存，最终拼凑出一条完整的SQL语句
+   */
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
   private int uniqueNumber;
 
   public DynamicContext(Configuration configuration, Object parameterObject) {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
+      // 对于非Map类型的参数，会创建对应的MetaObject对象，并封装成ContextMap对象
       MetaObject metaObject = configuration.newMetaObject(parameterObject);
       boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
       bindings = new ContextMap(metaObject, existsTypeHandler);
     } else {
       bindings = new ContextMap(null, false);
     }
+    // 将<PARAMETER_OBJECT_KEY, parameterObject>这一对应关系添加到bindings集合中,
+    // 其中PARAMETER_OBJECT_KEY的值是"_parameter"，在有的SqlNode实现中直接使用了该字面值
     bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
     bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
   }
@@ -62,10 +73,16 @@ public class DynamicContext {
     bindings.put(name, value);
   }
 
+  /**
+   * 追加SQL片段
+   */
   public void appendSql(String sql) {
     sqlBuilder.add(sql);
   }
 
+  /**
+   * 获取解析后完整的SQL
+   */
   public String getSql() {
     return sqlBuilder.toString().trim();
   }
@@ -74,8 +91,15 @@ public class DynamicContext {
     return uniqueNumber++;
   }
 
+  /**
+   * ContextMap继承HashMap，并重写了get方法
+   */
   static class ContextMap extends HashMap<String, Object> {
     private static final long serialVersionUID = 2977601501966151582L;
+
+    /**
+     * 将用户传入的参数封装成了MetaObject对象
+     */
     private final MetaObject parameterMetaObject;
     private final boolean fallbackParameterObject;
 
@@ -84,9 +108,13 @@ public class DynamicContext {
       this.fallbackParameterObject = fallbackParameterObject;
     }
 
+    /**
+     * 重写get()方法
+     */
     @Override
     public Object get(Object key) {
       String strKey = (String) key;
+      // 如果ContextMap中已经包含了该key，则直接返回
       if (super.containsKey(strKey)) {
         return super.get(strKey);
       }
@@ -98,6 +126,7 @@ public class DynamicContext {
       if (fallbackParameterObject && !parameterMetaObject.hasGetter(strKey)) {
         return parameterMetaObject.getOriginalObject();
       }
+      // 从运行时参数中查找对应属性
       // issue #61 do not modify the context when reading
       return parameterMetaObject.getValue(strKey);
     }

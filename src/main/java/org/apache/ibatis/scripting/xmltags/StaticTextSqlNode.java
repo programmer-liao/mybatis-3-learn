@@ -16,6 +16,7 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 使用text字段记录对应的非动态SQL语句节点
  * @author Clinton Begin
  */
 public class StaticTextSqlNode implements SqlNode {
@@ -27,6 +28,7 @@ public class StaticTextSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+    // 直接将text字段追加到DynamicContext.sqlBuilder字段中
     context.appendSql(text);
     return true;
   }

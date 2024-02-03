@@ -21,10 +21,15 @@ import java.util.List;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 解析where节点
  * @author Clinton Begin
  */
 public class WhereSqlNode extends TrimSqlNode {
 
+  /**
+   * ＜where＞节点解析后的SQL语句片段如果以“AND”或“OR”开头，则将开头处的“AND”或“OR”删除，
+   * 之后再将“WHERE”关键字添加到SQL片段开始位置，从而得到该＜where＞节点最终生成的SQL片段
+   */
   private static final List<String> prefixList = Arrays.asList("AND ", "OR ", "AND\n", "OR\n", "AND\r", "OR\r", "AND\t",
       "OR\t");
 

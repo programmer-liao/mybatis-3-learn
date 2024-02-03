@@ -22,12 +22,20 @@ import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 解析<foreach>节点
  * @author Clinton Begin
  */
 public class ForEachSqlNode implements SqlNode {
   public static final String ITEM_PREFIX = "__frch_";
 
+  /**
+   * 用于判断循环的终止条件，ForeachSqlNode构造方法中会创建该对象
+   */
   private final ExpressionEvaluator evaluator;
+
+  /**
+   * 迭代的集合表达式
+   */
   private final String collectionExpression;
   private final Boolean nullable;
   private final SqlNode contents;

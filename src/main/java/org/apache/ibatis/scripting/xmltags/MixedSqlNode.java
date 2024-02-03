@@ -18,6 +18,7 @@ package org.apache.ibatis.scripting.xmltags;
 import java.util.List;
 
 /**
+ * 使用contents字段记录子节点对应的SqlNode对象集合
  * @author Clinton Begin
  */
 public class MixedSqlNode implements SqlNode {
@@ -29,6 +30,7 @@ public class MixedSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+    // 循环调用contents集合中所有SqlNode对象的apply()方法
     contents.forEach(node -> node.apply(context));
     return true;
   }

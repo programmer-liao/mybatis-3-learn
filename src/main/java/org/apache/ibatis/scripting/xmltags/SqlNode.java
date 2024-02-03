@@ -16,8 +16,14 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 用来解析动态SQL
  * @author Clinton Begin
  */
 public interface SqlNode {
+  /**
+   * 1.该方法会根据用户传入的实参解析改SqlNode所记录的SQL动态节点，
+   * 并调用DynamicContext.appendSql()方法将解析后的SQL片段追加到DynamicContext.sqlBuilder中保存
+   * 2.当SQL节点下的所有SqlNode完成解析后，我们就可以从DynamicContext中获取一条动态生成的完整的SQL语句
+   */
   boolean apply(DynamicContext context);
 }
