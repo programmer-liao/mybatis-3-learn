@@ -37,6 +37,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.type.UnknownTypeHandler;
 
 /**
+ * DefaultResultSetHandler在获取ResultSet对象之后，会将其封装成ResultSetWrapper对象再进行处理。
+ * 在ResultSetWrapper中记录了ResultSet中的一些元数据，并且提供了一系列操作ResultSet的辅助方法。
  * @author Iwao AVE!
  */
 public class ResultSetWrapper {

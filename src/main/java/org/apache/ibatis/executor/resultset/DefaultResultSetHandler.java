@@ -69,6 +69,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * DefaultResultSetHandler是MyBatis提供的ResultSetHandler接口的唯一实现。
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Iwao AVE!

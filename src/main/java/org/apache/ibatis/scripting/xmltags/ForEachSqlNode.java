@@ -38,12 +38,37 @@ public class ForEachSqlNode implements SqlNode {
    */
   private final String collectionExpression;
   private final Boolean nullable;
+
+  /**
+   * 记录了该ForeachSqlNode的子节点
+   */
   private final SqlNode contents;
+
+  /**
+   * 在循环开始前要添加的字符串
+   */
   private final String open;
+
+  /**
+   * 在循环结束后要添加的字符串
+   */
   private final String close;
+
+  /**
+   * 循环过程中，每项之间的分隔符
+   */
   private final String separator;
+
+  /**
+   * index是当前迭代的次数，item的值是本次迭代的元素
+   * 若迭代集合是Map，则index是键，item是指
+   */
   private final String item;
   private final String index;
+
+  /**
+   * 全局配置对象
+   */
   private final Configuration configuration;
 
   /**
