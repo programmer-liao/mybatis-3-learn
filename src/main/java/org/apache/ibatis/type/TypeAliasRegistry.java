@@ -33,10 +33,14 @@ import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 别名注册与管理
  * @author Clinton Begin
  */
 public class TypeAliasRegistry {
 
+  /**
+   * 通过Map结构管理别名与Java类型之间的对应关系
+   */
   private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
   public TypeAliasRegistry() {
