@@ -20,14 +20,23 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 责任链模式 - 拦截器执行链
  * @author Clinton Begin
  */
 public class InterceptorChain {
 
+  /**
+   * 记录了mybatis-config.xml文件中配置的拦截器
+   */
   private final List<Interceptor> interceptors = new ArrayList<>();
 
+  /**
+   * 遍历interceptors
+   */
   public Object pluginAll(Object target) {
+    // 遍历interceptors集合
     for (Interceptor interceptor : interceptors) {
+      // 调用Interceptor.plugin()方法
       target = interceptor.plugin(target);
     }
     return target;
@@ -38,6 +47,7 @@ public class InterceptorChain {
   }
 
   public List<Interceptor> getInterceptors() {
+    // 返回不可修改的List
     return Collections.unmodifiableList(interceptors);
   }
 

@@ -44,7 +44,9 @@ public abstract class VFS {
   public static final List<Class<? extends VFS>> USER_IMPLEMENTATIONS = new ArrayList<>();
 
   /** Singleton instance holder. */
+  // 内部类实现单例模式
   private static class VFSHolder {
+    // 饿汉式
     static final VFS INSTANCE = createVFS();
 
     @SuppressWarnings("unchecked")
@@ -200,6 +202,7 @@ public abstract class VFS {
   }
 
   /**
+   * 检测当前VFS对象在当前环境下是否有效
    * Return true if the {@link VFS} implementation is valid for the current environment.
    *
    * @return true, if is valid
@@ -207,6 +210,7 @@ public abstract class VFS {
   public abstract boolean isValid();
 
   /**
+   * 负责查找指定的资源名称列表
    * Recursively list the full resource path of all the resources that are children of the resource identified by a URL.
    *
    * @param url

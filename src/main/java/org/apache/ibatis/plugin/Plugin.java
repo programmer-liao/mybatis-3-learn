@@ -27,12 +27,24 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 插件（拦截器）工具类
  * @author Clinton Begin
  */
 public class Plugin implements InvocationHandler {
 
+  /**
+   * 目标对象
+   */
   private final Object target;
+
+  /**
+   * Interceptor对象
+   */
   private final Interceptor interceptor;
+
+  /**
+   * 记录了@Signature注解中的信息
+   */
   private final Map<Class<?>, Set<Method>> signatureMap;
 
   private Plugin(Object target, Interceptor interceptor, Map<Class<?>, Set<Method>> signatureMap) {
@@ -42,10 +54,15 @@ public class Plugin implements InvocationHandler {
   }
 
   public static Object wrap(Object target, Interceptor interceptor) {
+    // 获取用户自定义Interceptor中@Signature注解的信息
+    // 处理@Signature注解
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
+    // 获取目标类型
     Class<?> type = target.getClass();
+    // 使用JDK动态代理的方式创建代理对象的基础
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
     if (interfaces.length > 0) {
+      // 使用JDK动态代理的方式创建动态对象
       return Proxy.newProxyInstance(type.getClassLoader(), interfaces, new Plugin(target, interceptor, signatureMap));
     }
     return target;

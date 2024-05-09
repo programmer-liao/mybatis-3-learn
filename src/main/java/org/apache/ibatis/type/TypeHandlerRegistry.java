@@ -49,6 +49,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 管理众多的TypeHandler实现
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * JDBC类型枚举（JDBC数据类型与Java数据类型不是完全对应的，JDBC <--TypeHandler--> Java）
  * @author Clinton Begin
  */
 public enum JdbcType {
@@ -108,7 +109,13 @@ public enum JdbcType {
 
   TIMESTAMP_WITH_TIMEZONE(Types.TIMESTAMP_WITH_TIMEZONE); // JDBC 4.2 JDK8
 
+  /**
+   * 记录JDBC类型在java.sql.Types中对应的常量编码
+   */
   public final int TYPE_CODE;
+  /**
+   * 维护常量编码与JdbcType之间的对应关系
+   */
   private static final Map<Integer, JdbcType> codeLookup = new HashMap<>();
 
   static {
