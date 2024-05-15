@@ -16,18 +16,34 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * SQL语句的类型
  * @author Clinton Begin
  */
 public enum SqlCommandType {
 
+  /**
+   * 未知的语句
+   */
   UNKNOWN,
 
+  /**
+   * 插入语句
+   */
   INSERT,
 
+  /**
+   * 更新语句
+   */
   UPDATE,
 
+  /**
+   * 删除语句
+   */
   DELETE,
 
+  /**
+   * 查询语句
+   */
   SELECT,
 
   FLUSH

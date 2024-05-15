@@ -39,7 +39,8 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
 /**
- * 封装了Mapper接口中对应方法的信息
+ * 封装了Mapper接口中对应方法的信息，以及对应SQL语句的信息
+ * 可以将MapperMethod看作连接Mapper接口以及映射配置文件中定义的SQL语句的桥梁
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
@@ -47,7 +48,14 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class MapperMethod {
 
+  /**
+   * 记录了SQL语句的名称和类型
+   */
   private final SqlCommand command;
+
+  /**
+   * Mapper接口中对应方法的相关信息
+   */
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
@@ -215,15 +223,26 @@ public class MapperMethod {
 
   }
 
+  /**
+   * 内部类，记录了SQL语句的名称和类型
+   */
   public static class SqlCommand {
 
+    /**
+     * 记录了SQL语句的名称
+     */
     private final String name;
+
+    /**
+     * 记录了SQL语句的类型
+     */
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
       final String methodName = method.getName();
       final Class<?> declaringClass = method.getDeclaringClass();
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass, configuration);
+      // 处理@Flush注解
       if (ms == null) {
         if (method.getAnnotation(Flush.class) == null) {
           throw new BindingException(
@@ -232,6 +251,7 @@ public class MapperMethod {
         name = null;
         type = SqlCommandType.FLUSH;
       } else {
+        // 初始化name和type
         name = ms.getId();
         type = ms.getSqlCommandType();
         if (type == SqlCommandType.UNKNOWN) {
@@ -248,15 +268,22 @@ public class MapperMethod {
       return type;
     }
 
+    /**
+     * 解析为MappedStatement
+     */
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName, Class<?> declaringClass,
         Configuration configuration) {
+      // SQL语句的名称是由Mapper接口的名称与对应的方法名称组成的
       String statementId = mapperInterface.getName() + "." + methodName;
+      // 检测是否有该名称的SQL语句
       if (configuration.hasStatement(statementId)) {
+        // 从Configuration.mappedStatements集合中查找对应的MappedStatement
         return configuration.getMappedStatement(statementId);
       }
       if (mapperInterface.equals(declaringClass)) {
         return null;
       }
+      // 如果指定方法是在父接口中定义的，则在此进行继承结构的处理
       for (Class<?> superInterface : mapperInterface.getInterfaces()) {
         if (declaringClass.isAssignableFrom(superInterface)) {
           MappedStatement ms = resolveMappedStatement(superInterface, methodName, declaringClass, configuration);
@@ -269,6 +296,9 @@ public class MapperMethod {
     }
   }
 
+  /**
+   * Mapper接口中对应方法的相关信息
+   */
   public static class MethodSignature {
 
     private final boolean returnsMany;
@@ -280,6 +310,10 @@ public class MapperMethod {
     private final String mapKey;
     private final Integer resultHandlerIndex;
     private final Integer rowBoundsIndex;
+
+    /**
+     * 用于处理Mapper接口中定义的方法的参数列表
+     */
     private final ParamNameResolver paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {

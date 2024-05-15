@@ -35,6 +35,9 @@ public class ParamNameResolver {
 
   public static final String GENERIC_NAME_PREFIX = "param";
 
+  /**
+   * 是否使用真实的参数名称
+   */
   private final boolean useActualParamName;
 
   /**
@@ -50,41 +53,63 @@ public class ParamNameResolver {
    * <li>aMethod(int a, RowBounds rb, int b) -&gt; {{0, "0"}, {2, "1"}}</li>
    * </ul>
    */
+  // 记录了参数在参数列表中的位置索引与参数名称之间的对应关系
+  // key表示参数在参数列表中的索引位置
+  // value表示参数名称，参数名称可以通过@Param注解指定
+  // 如果没有指定@Param注解，则使用参数索引作为其名称
+  // 如果参数列表中包含RowBounds类型或ResultHandler类型的参数，则这两种类型的参数并不会被记录到name集合中，这就会导致参数的索引与名称不一致
   private final SortedMap<Integer, String> names;
 
+  /**
+   * 记录对应方法的参数列表中是否使用了@Param注解
+   */
   private boolean hasParamAnnotation;
 
+  /**
+   * 通过反射的方式读取Mapper接口中对应方法的信息，并初始化names和hasParamAnnotation字段
+   */
   public ParamNameResolver(Configuration config, Method method) {
     this.useActualParamName = config.isUseActualParamName();
+    // 获取参数列表中每个参数的类型
     final Class<?>[] paramTypes = method.getParameterTypes();
+    // 获取参数列表上的注解
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+    // 该集合用于记录参数索引与参数名称的对应关系
     final SortedMap<Integer, String> map = new TreeMap<>();
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
+    // 遍历方法所有参数
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+      // 如果参数时RowBounds类型或ResultHandler类型，则跳过对该参数的分析
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
         continue;
       }
       String name = null;
+      // 遍历该参数的注解集合
       for (Annotation annotation : paramAnnotations[paramIndex]) {
         if (annotation instanceof Param) {
+          // @Param追截出现过一次，就将hasParamAnnotation初始化为true
           hasParamAnnotation = true;
+          // 获取@Param注解指定的参数名称
           name = ((Param) annotation).value();
           break;
         }
       }
+      // 该参数没有对应的@Param注解，则根据配置决定是否使用参数实际名称作为其名称
       if (name == null) {
         // @Param was not specified.
         if (useActualParamName) {
           name = getActualParamName(method, paramIndex);
         }
+        // 使用参数的索引作为其名称
         if (name == null) {
           // use the parameter index as the name ("0", "1", ...)
           // gcode issue #71
           name = String.valueOf(map.size());
         }
       }
+      // 记录到map中保存
       map.put(paramIndex, name);
     }
     names = Collections.unmodifiableSortedMap(map);
