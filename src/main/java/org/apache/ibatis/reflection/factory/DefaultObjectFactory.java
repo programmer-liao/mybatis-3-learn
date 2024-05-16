@@ -36,6 +36,7 @@ import org.apache.ibatis.reflection.Reflector;
 /**
  * @author Clinton Begin
  */
+// MyBatis提供的ObjectFactory接口的唯一实现，它是一个反射工厂
 public class DefaultObjectFactory implements ObjectFactory, Serializable {
 
   private static final long serialVersionUID = -8855120656740914948L;
@@ -56,6 +57,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
   private <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
       Constructor<T> constructor;
+      // 通过无参构造函数创建对象
       if (constructorArgTypes == null || constructorArgs == null) {
         constructor = type.getDeclaredConstructor();
         try {
@@ -68,6 +70,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
           throw e;
         }
       }
+      // 根据指定的参数列表查找构造函数，并实例化对象
       constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
       try {
         return constructor.newInstance(constructorArgs.toArray(new Object[0]));

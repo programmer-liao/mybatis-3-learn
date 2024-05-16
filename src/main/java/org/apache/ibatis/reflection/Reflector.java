@@ -51,36 +51,81 @@ import org.apache.ibatis.util.MapUtil;
  *
  * @author Clinton Begin
  */
+// 反射模块的基础，每个Reflector对象都对应一个类，在Reflector中缓存了反射操作需要使用的类的元信息
 public class Reflector {
 
   private static final MethodHandle isRecordMethodHandle = getIsRecordMethodHandle();
+
+  /**
+   * 对应的Class类型
+   */
   private final Class<?> type;
+
+  /**
+   * 可读属性的名称集合（可读属性就是存在相应getter方法的属性）
+   */
   private final String[] readablePropertyNames;
+
+  /**
+   * 可读属性的名称集合（可读属性就是存在相应setter方法的属性）
+   */
   private final String[] writablePropertyNames;
+
+  /**
+   * 记录了属性对应的setter方法，key是属性名称，value是Invoker对象，它是对setter方法对应Method方法的封装
+   */
   private final Map<String, Invoker> setMethods = new HashMap<>();
+
+  /**
+   * 属性对应的getter方法集合，key是属性名称，value也是Invoker对象
+   */
   private final Map<String, Invoker> getMethods = new HashMap<>();
+
+  /**
+   * 记录了属性相应的setter方法的参数值类型（key是属性名称，value是setter方法的参数类型）
+   */
   private final Map<String, Class<?>> setTypes = new HashMap<>();
+
+  /**
+   * 记录了属性相应的getter方法的返回值类型（key是属性名称，value是getter方法的返回值类型）
+   */
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+
+  /**
+   * 记录了默认构造方法
+   */
   private Constructor<?> defaultConstructor;
 
+  /**
+   * 记录了所有属性名称的集合
+   */
   private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
+  /**
+   * 在Reflector的构造方法中会解析指定的Class对象，并填充上述集合
+   */
   public Reflector(Class<?> clazz) {
     type = clazz;
+    // 茶查找clazz的默认构造方法（无参构造方法），具体实现是通过反射遍历所有构造方法
     addDefaultConstructor(clazz);
     Method[] classMethods = getClassMethods(clazz);
     if (isRecord(type)) {
       addRecordGetMethods(classMethods);
     } else {
+      // 处理clazz中的getter方法，填充getMethods集合和getTypes集合
       addGetMethods(classMethods);
+      // 处理clazz中的setter方法，填充setMethods集合和setTypes集合
       addSetMethods(classMethods);
+      // 处理没有getter/setter方法的字段
       addFields(clazz);
     }
+    // 根据getMethods/setMethods集合，初始化可读/写属性的名称集合
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
     for (String propName : readablePropertyNames) {
       caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
     }
+    // 初始化caseInsensitivePropertyMap集合，其中记录了所有大写格式的属性名称
     for (String propName : writablePropertyNames) {
       caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
     }
